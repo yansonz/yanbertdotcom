@@ -12,7 +12,6 @@ const I18n = {
       mailbox: {
         name: '📮 우편함',
         lines: [
-          '얀버트의 우편함이에요!',
           '👨 얀: <a href="https://www.linkedin.com/in/yanso" target="_blank">LinkedIn</a> | <a href="http://yanlog.yanbert.com" target="_blank">Blog</a><br>👩 로버트: <a href="https://www.linkedin.com/in/yoojin-lee-b7160511a" target="_blank">LinkedIn</a> | <a href="http://robert.yanbert.com" target="_blank">Blog</a>',
           '다음에 또 놀러오세요!'
         ]
@@ -53,7 +52,6 @@ const I18n = {
       mailbox: {
         name: '📮 Mailbox',
         lines: [
-          "It's YANBERT's mailbox!",
           '👨 Yan: <a href="https://www.linkedin.com/in/yanso" target="_blank">LinkedIn</a> | <a href="http://yanlog.yanbert.com" target="_blank">Blog</a><br>👩 Robert: <a href="https://www.linkedin.com/in/yoojin-lee-b7160511a" target="_blank">LinkedIn</a> | <a href="http://robert.yanbert.com" target="_blank">Blog</a>',
           'Come visit again!'
         ]

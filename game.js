@@ -218,6 +218,7 @@ function updatePlayer() {
   if (DialogSystem.active) return;
 
   const p = game.player;
+  const dt = game.dt;
   let dx = 0, dy = 0;
   p.moving = false;
 
@@ -246,6 +247,10 @@ function updatePlayer() {
     dx = (dx / len) * p.speed;
     dy = (dy / len) * p.speed;
   }
+
+  // delta time 적용
+  dx *= dt;
+  dy *= dt;
 
   if (dx !== 0 && !checkCollision(p.x + dx, p.y, p.width - 8, p.height - 8)) {
     p.x += dx;
@@ -369,6 +374,7 @@ function render() {
 function updateCat() {
   const cat = game.cat;
   const p = game.player;
+  const dt = game.dt;
   const mapW = game.mapCols * game.tileSize;
   const mapH = game.mapRows * game.tileSize;
 
@@ -388,8 +394,8 @@ function updateCat() {
     // fleeLock이 남아있으면 기존 방향 유지
     if (cat.fleeLock > 0) {
       cat.fleeLock--;
-      const nx = cat.x + Math.cos(cat.fleeAngle) * cat.fleeSpeed;
-      const ny = cat.y + Math.sin(cat.fleeAngle) * cat.fleeSpeed;
+      const nx = cat.x + Math.cos(cat.fleeAngle) * cat.fleeSpeed * dt;
+      const ny = cat.y + Math.sin(cat.fleeAngle) * cat.fleeSpeed * dt;
 
       // 기존 방향으로 갈 수 있으면 계속 진행
       if (nx >= 8 && nx + cat.width <= mapW - 8 &&
@@ -410,8 +416,8 @@ function updateCat() {
 
     for (const offset of tryAngles) {
       const a = angle + offset;
-      const nx = cat.x + Math.cos(a) * cat.fleeSpeed;
-      const ny = cat.y + Math.sin(a) * cat.fleeSpeed;
+      const nx = cat.x + Math.cos(a) * cat.fleeSpeed * dt;
+      const ny = cat.y + Math.sin(a) * cat.fleeSpeed * dt;
 
       if (nx < 8 || nx + cat.width > mapW - 8 || ny < 8 || ny + cat.height > mapH - 8) continue;
       if (checkCollisionForCat(nx, ny)) continue;
@@ -485,11 +491,11 @@ function updateCat() {
 
   // 한 축씩 이동
   if (Math.abs(tdx) > 3) {
-    const nx = cat.x + (tdx > 0 ? cat.speed : -cat.speed);
+    const nx = cat.x + (tdx > 0 ? cat.speed : -cat.speed) * dt;
     if (!checkCollisionForCat(nx, cat.y)) cat.x = nx;
     cat.direction = tdx > 0 ? 'right' : 'left';
   } else {
-    const ny = cat.y + (tdy > 0 ? cat.speed : -cat.speed);
+    const ny = cat.y + (tdy > 0 ? cat.speed : -cat.speed) * dt;
     if (!checkCollisionForCat(cat.x, ny)) cat.y = ny;
     cat.direction = tdy > 0 ? 'down' : 'up';
   }
@@ -565,13 +571,14 @@ function updateNpcs() {
 
     let nx = npc.x;
     let ny = npc.y;
+    const dt = game.dt;
 
     // X축 먼저, 도착하면 Y축
     if (Math.abs(dx) > 2) {
-      nx += dx > 0 ? npc.speed : -npc.speed;
+      nx += (dx > 0 ? npc.speed : -npc.speed) * dt;
       npc.direction = dx > 0 ? 'right' : 'left';
     } else {
-      ny += dy > 0 ? npc.speed : -npc.speed;
+      ny += (dy > 0 ? npc.speed : -npc.speed) * dt;
       npc.direction = dy > 0 ? 'down' : 'up';
     }
 
@@ -717,8 +724,17 @@ function setupTouchControls() {
 
 setupTouchControls();
 
-// 게임 루프
-function gameLoop() {
+// 게임 루프 (delta time 기반 - 60fps 기준)
+let lastTime = 0;
+game.dt = 1; // delta time 배수 (1 = 60fps 기준)
+
+function gameLoop(timestamp) {
+  if (lastTime === 0) lastTime = timestamp;
+  const elapsed = timestamp - lastTime;
+  lastTime = timestamp;
+  // 60fps 기준 delta time 배수 (16.667ms = 1프레임)
+  game.dt = Math.min(elapsed / 16.667, 3); // 최대 3배로 제한 (탭 전환 등 방지)
+
   game.frame++;
   updatePlayer();
   updateNpcs();
@@ -737,4 +753,4 @@ Music.init();
 DayNight.init();
 Weather.fetch();
 initMap();
-gameLoop();
+requestAnimationFrame(gameLoop);
