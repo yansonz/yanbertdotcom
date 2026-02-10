@@ -46,7 +46,9 @@ const Music = {
       if (this.ctx) {
         // 이미 생성됐지만 suspended 상태일 수 있음 (사파리)
         if (this.ctx.state === 'suspended') {
-          this.ctx.resume();
+          this.ctx.resume().then(() => {
+            if (!this.playing) this.play();
+          });
         }
         return;
       }
@@ -54,18 +56,38 @@ const Music = {
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.value = 0.3;
       this.masterGain.connect(this.ctx.destination);
-      // 사파리 모바일: 사용자 제스처 내에서 resume 필수
+
+      // 사파리 unlock: 무음 버퍼를 즉시 재생해야 AudioContext가 활성화됨
+      const silent = this.ctx.createBuffer(1, 1, 22050);
+      const src = this.ctx.createBufferSource();
+      src.buffer = silent;
+      src.connect(this.ctx.destination);
+      src.start(0);
+
+      // resume 후 play
+      const doPlay = () => {
+        if (!this.playing) this.play();
+        removeListeners();
+      };
+
       if (this.ctx.state === 'suspended') {
-        this.ctx.resume();
+        this.ctx.resume().then(doPlay);
+      } else {
+        doPlay();
       }
-      this.play();
+    };
+
+    const removeListeners = () => {
       document.removeEventListener('click', start);
       document.removeEventListener('keydown', start);
       document.removeEventListener('touchstart', start);
+      document.removeEventListener('touchend', start);
     };
+
     document.addEventListener('click', start);
     document.addEventListener('keydown', start);
     document.addEventListener('touchstart', start, { passive: true });
+    document.addEventListener('touchend', start, { passive: true });
   },
 
   // 사각파 음 재생 (레트로 느낌)
