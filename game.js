@@ -126,6 +126,26 @@ function initMap() {
     { x: 32, y: 340 }, { x: 384, y: 320 },
   ];
 
+  // 나무별 새 초기화 (각 나무에 1~2마리, 1회만 도망)
+  game.birds = [];
+  game.trees.forEach((t, i) => {
+    const count = 1 + (i % 2); // 1~2마리
+    for (let b = 0; b < count; b++) {
+      game.birds.push({
+        treeIdx: i,
+        x: t.x + 8 + b * 12,
+        y: t.y + 2 + b * 4,
+        perched: true,       // 나무에 앉아있는 상태
+        fled: false,         // 이미 도망갔는지
+        flyX: 0, flyY: 0,    // 날아가는 좌표
+        flyVx: 0, flyVy: 0,  // 날아가는 속도
+        flyTimer: 0,          // 날아가는 타이머
+        wingFrame: 0,
+        color: ['#6b4226', '#555', '#8b6914'][b % 3]
+      });
+    }
+  });
+
   // 나무 충돌
   game.trees.forEach(t => {
     game.colliders.push({ x: t.x + 8, y: t.y + 20, w: 16, h: 20 });
@@ -322,6 +342,13 @@ function render() {
     Sprites.drawTree(ctx, t.x, t.y);
   });
 
+  // 새 그리기 (날아가는 새만)
+  game.birds.forEach(bird => {
+    if (!bird.perched && bird.flyTimer > 0) {
+      Sprites.drawBirdFlying(ctx, bird.flyX, bird.flyY, bird.color, bird.wingFrame);
+    }
+  });
+
   // 우편함 그리기
   Sprites.drawMailbox(ctx, game.mailbox.x, game.mailbox.y, game.frame);
   const nearTarget = getNearbyNpc();
@@ -368,6 +395,43 @@ function render() {
   DayNight.render(ctx, INTERNAL_W, INTERNAL_H);
 
 
+}
+
+// 새 업데이트 (나무 근처 접근 시 날아감)
+function updateBirds() {
+  const p = game.player;
+  const fleeDist = 50;
+
+  game.birds.forEach(bird => {
+    if (bird.fled && bird.flyTimer <= 0) return; // 이미 사라짐
+
+    if (bird.perched) {
+      // 플레이어와의 거리 체크
+      const dx = (p.x + p.width / 2) - bird.x;
+      const dy = (p.y + p.height / 2) - bird.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < fleeDist) {
+        // 날아가기 시작
+        bird.perched = false;
+        bird.fled = true;
+        bird.flyX = bird.x;
+        bird.flyY = bird.y;
+        // 플레이어 반대 방향 + 위로
+        const angle = Math.atan2(-dy, -dx) + (Math.random() - 0.5) * 1.2;
+        bird.flyVx = Math.cos(angle) * (2 + Math.random());
+        bird.flyVy = -(2 + Math.random() * 2); // 위로 날아감
+        bird.flyTimer = 60; // 60프레임 후 사라짐
+      }
+    } else if (bird.flyTimer > 0) {
+      // 날아가는 중
+      bird.flyX += bird.flyVx * game.dt;
+      bird.flyY += bird.flyVy * game.dt;
+      bird.flyVy -= 0.02 * game.dt; // 약간 위로 가속
+      bird.wingFrame++;
+      bird.flyTimer--;
+    }
+  });
 }
 
 // 고양이 AI (하루가 가까이 오면 도망)
@@ -746,6 +810,7 @@ function gameLoop(timestamp) {
   updatePlayer();
   updateNpcs();
   updateCat();
+  updateBirds();
   updateCamera();
   Weather.update(game.frame);
   DayNight.update(game.frame);

@@ -85,9 +85,25 @@ body {
   color: #fff;
 }
 
-#weather-info {
+#time-info {
   position: absolute;
   top: 6px;
+  left: 6px;
+  z-index: 5;
+  font-family: 'DungGeunMo', 'Press Start 2P', cursive;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  padding: 6px 10px;
+  line-height: 1;
+  display: none;
+}
+
+#weather-info {
+  position: absolute;
+  top: 32px;
   left: 6px;
   z-index: 5;
   font-family: 'DungGeunMo', 'Press Start 2P', cursive;
@@ -343,6 +359,11 @@ body {
   #weather-info,
   #lang-toggle,
   #music-toggle {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  #time-info {
     font-size: 10px;
     padding: 5px 8px;
   }

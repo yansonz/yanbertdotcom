@@ -452,6 +452,54 @@ const Sprites = {
     ctx.restore();
   },
 
+  // 새 (나무 위에 앉아있는 상태)
+  drawBirdPerched(ctx, x, y, color, frame) {
+    ctx.save();
+    ctx.translate(x, y);
+    // 몸통
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 2, 6, 4);
+    // 머리
+    ctx.fillRect(5, 0, 4, 4);
+    // 부리
+    ctx.fillStyle = '#f0a030';
+    ctx.fillRect(9, 1, 2, 2);
+    // 눈
+    ctx.fillStyle = '#111';
+    ctx.fillRect(7, 1, 1, 1);
+    // 꼬리
+    ctx.fillStyle = color;
+    ctx.fillRect(-2, 1, 3, 2);
+    // 다리
+    ctx.fillStyle = '#8b6914';
+    ctx.fillRect(1, 6, 1, 2);
+    ctx.fillRect(4, 6, 1, 2);
+    ctx.restore();
+  },
+
+  // 새 (날아가는 상태)
+  drawBirdFlying(ctx, x, y, color, wingFrame) {
+    ctx.save();
+    ctx.translate(x, y);
+    // 몸통
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 2, 6, 3);
+    // 머리
+    ctx.fillRect(5, 1, 3, 3);
+    // 부리
+    ctx.fillStyle = '#f0a030';
+    ctx.fillRect(8, 2, 2, 1);
+    // 날개 (퍼덕임)
+    ctx.fillStyle = color;
+    const wingUp = Math.sin(wingFrame * 0.5) > 0;
+    if (wingUp) {
+      ctx.fillRect(1, -2, 4, 3);
+    } else {
+      ctx.fillRect(1, 5, 4, 3);
+    }
+    ctx.restore();
+  },
+
   // 우편함
   drawMailbox(ctx, x, y, frame) {
     ctx.save();

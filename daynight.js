@@ -7,6 +7,9 @@ const DayNight = {
 
   init() {
     this.updateTime();
+    this.updateTimeDisplay();
+    // 1분마다 시간 갱신
+    setInterval(() => { this.updateTime(); this.updateTimeDisplay(); }, 60000);
     // 별 위치 미리 생성
     for (let i = 0; i < 30; i++) {
       this.stars.push({
@@ -36,6 +39,19 @@ const DayNight = {
     }
 
     this.setupOverlay();
+  },
+
+  // KST 시간 표시 업데이트
+  updateTimeDisplay() {
+    const el = document.getElementById('time-info');
+    if (!el) return;
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const kst = new Date(utc + 9 * 3600000);
+    const h = String(kst.getHours()).padStart(2, '0');
+    const m = String(kst.getMinutes()).padStart(2, '0');
+    el.textContent = `🕐 ${h}:${m} KST`;
+    el.style.display = 'block';
   },
 
   setupOverlay() {
@@ -70,6 +86,11 @@ const DayNight = {
   },
 
   update(frame) {
+    // 매 600프레임(~10초)마다 시간 갱신
+    if (frame % 600 === 0) {
+      this.updateTime();
+      this.updateTimeDisplay();
+    }
     // 별 반짝임
     this.stars.forEach(s => {
       s.twinkle += 0.03;
