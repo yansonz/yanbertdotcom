@@ -43,11 +43,21 @@ const Music = {
   init() {
     // 사용자 인터랙션 후 초기화
     const start = () => {
-      if (this.ctx) return;
+      if (this.ctx) {
+        // 이미 생성됐지만 suspended 상태일 수 있음 (사파리)
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        return;
+      }
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.value = 0.3;
       this.masterGain.connect(this.ctx.destination);
+      // 사파리 모바일: 사용자 제스처 내에서 resume 필수
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
       this.play();
       document.removeEventListener('click', start);
       document.removeEventListener('keydown', start);
@@ -55,7 +65,7 @@ const Music = {
     };
     document.addEventListener('click', start);
     document.addEventListener('keydown', start);
-    document.addEventListener('touchstart', start);
+    document.addEventListener('touchstart', start, { passive: true });
   },
 
   // 사각파 음 재생 (레트로 느낌)
