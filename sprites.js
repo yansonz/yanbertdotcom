@@ -317,14 +317,35 @@ const Sprites = {
     ctx.fillRect(x + 12, y + 24, 2, 3);
   },
 
-  // 길 타일
+  // 길 타일 (돌바닥)
   drawPath(ctx, x, y) {
-    ctx.fillStyle = '#c4a86a';
+    // 바닥 베이스 (회색)
+    ctx.fillStyle = '#8a8a8a';
     ctx.fillRect(x, y, 32, 32);
-    ctx.fillStyle = '#b89858';
-    ctx.fillRect(x + 6, y + 4, 4, 4);
-    ctx.fillRect(x + 18, y + 20, 5, 3);
-    ctx.fillRect(x + 24, y + 8, 3, 4);
+    
+    // 돌 패턴
+    ctx.fillStyle = '#9a9a9a';
+    ctx.fillRect(x + 2, y + 2, 12, 10);
+    ctx.fillRect(x + 16, y + 4, 14, 8);
+    ctx.fillRect(x + 4, y + 14, 10, 8);
+    ctx.fillRect(x + 16, y + 14, 12, 10);
+    ctx.fillRect(x + 2, y + 24, 14, 6);
+    ctx.fillRect(x + 18, y + 26, 12, 5);
+    
+    // 돌 하이라이트
+    ctx.fillStyle = '#aaaaaa';
+    ctx.fillRect(x + 3, y + 3, 4, 2);
+    ctx.fillRect(x + 17, y + 5, 4, 2);
+    ctx.fillRect(x + 5, y + 15, 3, 2);
+    ctx.fillRect(x + 17, y + 15, 4, 2);
+    
+    // 돌 사이 틈 (어두운 선)
+    ctx.fillStyle = '#6a6a6a';
+    ctx.fillRect(x + 14, y, 2, 12);
+    ctx.fillRect(x, y + 12, 32, 2);
+    ctx.fillRect(x + 14, y + 14, 2, 10);
+    ctx.fillRect(x, y + 24, 32, 2);
+    ctx.fillRect(x + 16, y + 24, 2, 8);
   },
 
   // 상호작용 아이콘 (느낌표)

@@ -29,6 +29,8 @@ const I18n = {
           '하루야, 넌 정말 우리 가족의 보물이야. 알지?',
           '오늘 코딩하다가 버그 잡느라 힘들었는데... 하루 보니까 힐링된다.',
           '꼬리 흔드는 거 봐~ 기분 좋은 거지? 나도 기분 좋아!',
+          '고양이는 절대 못잡으니까 포기해.',
+          '하루때문에 나무에 새들 다 날아간다🐦',
         ]
       },
       robert: {
@@ -43,6 +45,7 @@ const I18n = {
           '간식 더 줄까? ...얀한테는 비밀이야! 🤫',
           '그럴 수 있지',
           '허락보다 용서가 쉽다!',
+          '지금 음악은 모차르트 레퀴엠 Introitus 스타일의 D단조 멜로디야 어때?',
         ]
       }
     },
@@ -72,6 +75,8 @@ const I18n = {
           "Haru, you're truly our family's treasure. You know that, right?",
           'I was debugging code all day... Seeing you makes it all better.',
           "Look at that tail wagging~ You're happy, right? Me too!",
+          "You'll never catch that cat, so just give up.",
+          "Haru keeps scaring all the birds away from the trees 🐦",
         ]
       },
       robert: {
@@ -86,6 +91,7 @@ const I18n = {
           "Want more treats? ...Don't tell Yan! 🤫",
           "It happens",
           "Easier to ask forgiveness than permission!",
+          "The music is Mozart's Requiem Introitus style in D minor. How do you like it?",
         ]
       }
     }
