@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>하루의 정원 - 2D RPG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="title">Welcome to YANBERT's house!</div>
+  <div id="game-wrapper">
+    <canvas id="game"></canvas>
+    <div id="weather-info"></div>
+    <button id="music-toggle" onclick="Music.toggle()">🎵</button>
+    <button id="lang-toggle" onclick="I18n.toggle()">🌐 EN</button>
+  </div>
+  <div id="dialog" class="dialog hidden" ontouchstart="if(event.target.tagName!=='A'){event.preventDefault();DialogSystem.advance();}">
+    <div class="dialog-name" id="dialog-name"></div>
+    <div class="dialog-text" id="dialog-text"></div>
+    <div class="dialog-hint">Space / 탭으로 계속</div>
+  </div>
+  <div id="touch-controls">
+    <div id="joystick-zone">
+      <div id="joystick-base">
+        <div id="joystick-knob"></div>
+      </div>
+    </div>
+    <button class="action-btn" id="btn-action">💬</button>
+  </div>
+  <div id="instructions">
+    <p>🐕 방향키로 이동 | Space로 NPC와 대화</p>
+  </div>
+  <script src="i18n.js"></script>
+  <script src="music.js"></script>
+  <script src="weather.js"></script>
+  <script src="daynight.js"></script>
+  <script src="sprites.js"></script>
+  <script src="npc.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
