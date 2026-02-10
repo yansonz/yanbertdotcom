@@ -23,14 +23,14 @@ const I18n = {
         name: '얀',
         lines: [
           '어, 하루! 왔구나~ 오늘도 산책 나왔어?',
-          '정원에 새로 심은 장미가 잘 자라고 있어. 한번 봐봐!',
+          '정원에 새로 심은 꽃들이 잘 자라고 있어. 한번 봐봐!',
           '로버트가 오늘 맛있는 간식 만들었대. 가서 물어봐!',
-          '날씨가 참 좋다... 하루랑 같이 있으니까 더 좋네.',
           '하루야, 넌 정말 우리 가족의 보물이야. 알지?',
           '오늘 코딩하다가 버그 잡느라 힘들었는데... 하루 보니까 힐링된다.',
           '꼬리 흔드는 거 봐~ 기분 좋은 거지? 나도 기분 좋아!',
           '고양이는 절대 못잡으니까 포기해.',
           '하루때문에 나무에 새들 다 날아간다🐦',
+          '좌측 상단에 보이는 날씨 정보는 실시간 정보야!',
         ]
       },
       robert: {
@@ -45,7 +45,6 @@ const I18n = {
           '간식 더 줄까? ...얀한테는 비밀이야! 🤫',
           '그럴 수 있지',
           '허락보다 용서가 쉽다!',
-          '지금 음악은 모차르트 레퀴엠 Introitus 스타일의 D단조 멜로디야 어때?',
         ]
       }
     },
@@ -71,7 +70,6 @@ const I18n = {
           "Oh, Haru! You're here~ Out for a walk today?",
           'The roses I planted in the garden are growing well. Take a look!',
           'Robert made some tasty treats today. Go ask her!',
-          "The weather is so nice... It's even better with you, Haru.",
           "Haru, you're truly our family's treasure. You know that, right?",
           'I was debugging code all day... Seeing you makes it all better.',
           "Look at that tail wagging~ You're happy, right? Me too!",
@@ -91,7 +89,6 @@ const I18n = {
           "Want more treats? ...Don't tell Yan! 🤫",
           "It happens",
           "Easier to ask forgiveness than permission!",
-          "The music is Mozart's Requiem Introitus style in D minor. How do you like it?",
         ]
       }
     }
