@@ -41,53 +41,46 @@ const Music = {
   ],
 
   init() {
-    // 사용자 인터랙션 후 초기화
-    const start = () => {
-      if (this.ctx) {
-        // 이미 생성됐지만 suspended 상태일 수 있음 (사파리)
-        if (this.ctx.state === 'suspended') {
-          this.ctx.resume().then(() => {
-            if (!this.playing) this.play();
-          });
-        }
-        return;
-      }
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.value = 0.3;
-      this.masterGain.connect(this.ctx.destination);
+    // 시작 오버레이 탭으로 AudioContext 초기화 (사파리 모바일 호환)
+    const overlay = document.getElementById('start-overlay');
+    if (!overlay) return;
 
-      // 사파리 unlock: 무음 버퍼를 즉시 재생해야 AudioContext가 활성화됨
+    const startGame = (e) => {
+      e.preventDefault();
+
+      // AudioContext 생성 및 unlock
+      if (!this.ctx) {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.3;
+        this.masterGain.connect(this.ctx.destination);
+      }
+
+      // 사파리 unlock: 무음 버퍼 재생
       const silent = this.ctx.createBuffer(1, 1, 22050);
       const src = this.ctx.createBufferSource();
       src.buffer = silent;
       src.connect(this.ctx.destination);
       src.start(0);
 
-      // resume 후 play
-      const doPlay = () => {
-        if (!this.playing) this.play();
-        removeListeners();
-      };
-
       if (this.ctx.state === 'suspended') {
-        this.ctx.resume().then(doPlay);
+        this.ctx.resume().then(() => {
+          if (!this.playing) this.play();
+        });
       } else {
-        doPlay();
+        if (!this.playing) this.play();
       }
+
+      // 오버레이 숨기기
+      overlay.classList.add('hidden');
+      overlay.removeEventListener('click', startGame);
+      overlay.removeEventListener('touchend', startGame);
+      document.removeEventListener('keydown', startGame);
     };
 
-    const removeListeners = () => {
-      document.removeEventListener('click', start);
-      document.removeEventListener('keydown', start);
-      document.removeEventListener('touchstart', start);
-      document.removeEventListener('touchend', start);
-    };
-
-    document.addEventListener('click', start);
-    document.addEventListener('keydown', start);
-    document.addEventListener('touchstart', start, { passive: true });
-    document.addEventListener('touchend', start, { passive: true });
+    overlay.addEventListener('click', startGame);
+    overlay.addEventListener('touchend', startGame);
+    document.addEventListener('keydown', startGame);
   },
 
   // 사각파 음 재생 (레트로 느낌)

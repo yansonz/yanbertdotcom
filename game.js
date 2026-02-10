@@ -25,7 +25,7 @@ const game = {
 
   // 플레이어 (하루)
   player: {
-    x: 208,
+    x: 176,
     y: 300,
     speed: 2.5,
     direction: 'down',
