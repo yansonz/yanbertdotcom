@@ -12,8 +12,11 @@ const I18n = {
       mailbox: {
         name: '📮 우편함',
         lines: [
+          '이 편지는 영국에서 최초로 시작되어 일년에 한바퀴를 돌면서 받는 사람에게 행운을 주었습니다.',
+          '지금은 당신에게로 옮겨진 이 편지는 4일 안에 당신 곁을 떠나야 합니다.',
+          '이 편지를 보낸 사람은...',
           '👨 얀: <a href="https://www.linkedin.com/in/yanso" target="_blank">LinkedIn</a> | <a href="http://yanlog.yanbert.com" target="_blank">Blog</a><br>👩 로버트: <a href="https://www.linkedin.com/in/yoojin-lee-b7160511a" target="_blank">LinkedIn</a> | <a href="http://robert.yanbert.com" target="_blank">Blog</a>',
-          '다음에 또 놀러오세요!'
+          '이 편지를 무시하면 하루에게 간식을 빼앗깁니다. 믿거나 말거나... 🐕'
         ]
       },
       yan: {
@@ -50,10 +53,13 @@ const I18n = {
       location: 'Seoul',
       catMeow: 'Meow~',
       mailbox: {
-        name: '📮 Mailbox',
+        name: '📮 Mail Box',
         lines: [
+          'DO NOT DELETE THIS MESSAGE!! Forward this to 10 friends or face 7 years of bad luck!!!',
+          'A guy in Ohio ignored this in 2003 and his WiFi has been slow ever since...',
+          'This message was sent by...',
           '👨 Yan: <a href="https://www.linkedin.com/in/yanso" target="_blank">LinkedIn</a> | <a href="http://yanlog.yanbert.com" target="_blank">Blog</a><br>👩 Robert: <a href="https://www.linkedin.com/in/yoojin-lee-b7160511a" target="_blank">LinkedIn</a> | <a href="http://robert.yanbert.com" target="_blank">Blog</a>',
-          'Come visit again!'
+          'If you ignore this, Haru WILL find your snacks. You have been warned... 🐕'
         ]
       },
       yan: {
