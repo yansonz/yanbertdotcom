@@ -462,6 +462,13 @@ function updateCat() {
 
   cat.fleeing = false;
 
+  // 하루가 멀리 있으면 가만히 있기
+  const idleDist = 150;
+  if (dist > idleDist) {
+    cat.moving = false;
+    return;
+  }
+
   // 일반 모드 - 대부분 가만히 있음
   if (cat.waitTimer > 0) {
     cat.waitTimer--;
