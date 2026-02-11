@@ -26,7 +26,7 @@ const Weather = {
   // API에서 날씨 가져오기
   async fetch() {
     try {
-      const url = 'https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.978&current=temperature_2m,weathercode';
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=37.5145&longitude=127.1059&current=temperature_2m,weathercode';
       const res = await fetch(url);
       const data = await res.json();
       this.temperature = data.current.temperature_2m;
