@@ -1,14 +1,13 @@
 // BGM 시스템 - Web Audio API 기반 서정적 판타지 스타일 오리지널
+// Safari 백그라운드 탭 throttle 우회: 모든 음을 미리 스케줄링
 const Music = {
   ctx: null,
   playing: false,
   muted: false,
   masterGain: null,
   tempo: 66, // 느리고 감성적인 템포
-  currentStep: 0,
-  nextNoteTime: 0,
-  scheduleAheadTime: 0.1, // 100ms 미리 스케줄
-  lookAhead: 25, // 25ms마다 체크
+  startTime: 0,
+  loopDuration: 0,
 
   // 음계 주파수 (C장조/A단조 - 서정적이고 쓸쓸한 느낌)
   notes: {
@@ -90,62 +89,6 @@ const Music = {
     document.addEventListener('keydown', startGame);
   },
 
-  // 부드러운 피아노 느낌
-  playNote(freq, duration, type, gainVal) {
-    if (!this.ctx || freq === 0) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    // 피아노처럼 부드러운 어택, 긴 릴리즈
-    gain.gain.setValueAtTime(0, this.ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(gainVal, this.ctx.currentTime + 0.02);
-    gain.gain.setValueAtTime(gainVal * 0.7, this.ctx.currentTime + 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(this.masterGain);
-    osc.start(this.ctx.currentTime);
-    osc.stop(this.ctx.currentTime + duration);
-  },
-
-  play() {
-    if (this.playing) return;
-    this.playing = true;
-    this.nextNoteTime = this.ctx.currentTime;
-    this.scheduler();
-  },
-
-  scheduler() {
-    // AudioContext 시간 기반 스케줄링 (탭 전환 시에도 정확함)
-    while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
-      this.scheduleNote(this.currentStep, this.nextNoteTime);
-      this.advance();
-    }
-    if (this.playing) {
-      setTimeout(() => this.scheduler(), this.lookAhead);
-    }
-  },
-
-  advance() {
-    const stepDuration = 60 / this.tempo / 2; // 8분음표 기준
-    this.nextNoteTime += stepDuration;
-    this.currentStep++;
-  },
-
-  scheduleNote(step, time) {
-    if (this.muted) return;
-    const idx = step % this.melody.length;
-    const stepDuration = 60 / this.tempo / 2;
-
-    // 멜로디 (삼각파 - 부드럽고 맑은 소리)
-    const melNote = this.notes[this.melody[idx]];
-    if (melNote) this.playNoteAt(melNote, stepDuration * 3, 'triangle', 0.2, time);
-
-    // 베이스 아르페지오 (사인파 - 따뜻한 피아노 느낌)
-    const bassNote = this.notes[this.bass[idx]];
-    if (bassNote) this.playNoteAt(bassNote, stepDuration * 1.5, 'sine', 0.15, time);
-  },
-
   // 지정된 시간에 음 재생
   playNoteAt(freq, duration, type, gainVal, time) {
     if (!this.ctx || freq === 0) return;
@@ -164,6 +107,46 @@ const Music = {
     osc.stop(time + duration);
   },
 
+  play() {
+    if (this.playing) return;
+    this.playing = true;
+    this.startTime = this.ctx.currentTime;
+    const stepDuration = 60 / this.tempo / 2; // 8분음표 기준
+    
+    // 멜로디 길이 계산
+    this.loopDuration = this.melody.length * stepDuration;
+    
+    // 무한 루프: 30초마다 다시 스케줄 (Safari 안정성)
+    this.scheduleLoop(0);
+  },
+
+  scheduleLoop(loopCount) {
+    if (!this.playing) return;
+    
+    const stepDuration = 60 / this.tempo / 2;
+    const loopStartTime = this.startTime + loopCount * this.loopDuration;
+    
+    // 현재 루프의 모든 음 미리 스케줄
+    for (let i = 0; i < this.melody.length; i++) {
+      const noteTime = loopStartTime + i * stepDuration;
+      
+      if (this.muted) continue;
+      
+      // 멜로디 (삼각파)
+      const melNote = this.notes[this.melody[i]];
+      if (melNote) this.playNoteAt(melNote, stepDuration * 3, 'triangle', 0.2, noteTime);
+      
+      // 베이스 아르페지오 (사인파)
+      const bassNote = this.notes[this.bass[i]];
+      if (bassNote) this.playNoteAt(bassNote, stepDuration * 1.5, 'sine', 0.15, noteTime);
+    }
+    
+    // 다음 루프 스케줄 (현재 루프 끝나기 전에)
+    if (this.playing) {
+      setTimeout(() => this.scheduleLoop(loopCount + 1), this.loopDuration * 900);
+    }
+  },
+
   toggle() {
     this.muted = !this.muted;
     if (this.masterGain) {
@@ -174,7 +157,6 @@ const Music = {
   },
 
   stop() {
-    if (this.intervalId) clearInterval(this.intervalId);
     this.playing = false;
   }
 };
