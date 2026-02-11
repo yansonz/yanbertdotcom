@@ -207,7 +207,7 @@ body {
 }
 
 #start-text {
-  font-family: 'DungGeunMo', 'Press Start 2P', cursive;
+  font-family: 'Press Start 2P', 'DungGeunMo', cursive;
   color: #f0d060;
   font-size: clamp(16px, 5vw, 28px);
   text-shadow: 2px 2px 0 #8b6914, 0 0 20px rgba(240, 208, 96, 0.4);
