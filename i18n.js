@@ -22,15 +22,16 @@ const I18n = {
       yan: {
         name: '얀',
         lines: [
-          '어, 하루! 왔구나~ 오늘도 산책 나왔어?',
-          '정원에 새로 심은 꽃들이 잘 자라고 있어. 한번 봐봐!',
-          '로버트가 오늘 맛있는 간식 만들었대. 가서 물어봐!',
-          '하루야, 넌 정말 우리 가족의 보물이야. 알지?',
-          '오늘 코딩하다가 버그 잡느라 힘들었는데... 하루 보니까 힐링된다.',
-          '꼬리 흔드는 거 봐~ 기분 좋은 거지? 나도 기분 좋아!',
+          '어, 하루! 왔구나~',
+          '배경음악은 프리렌 "OST Time Flows Ever Onward"로 하고 싶었는데, 저작권 때문에 AI로 비슷하게 만들었어.',
+          '날씨 정보는 Open-Meteo API에서 서울지역 정보를 실시간으로 가져와. 현재 날씨에 맞게 비, 눈, 안개 같은 파티클 효과가 적용되지!',
+          '낮과 밤은 실제 일출/일몰 시간을 기반으로 해. 계절마다 달라지지!',
+          '이 정원은 반응형 디자인이라 모바일에서도 터치 컨트롤로 즐길 수 있어.',
+          '한국어와 영어를 자동으로 감지해서 지원해. 우측 상단의 🌐 버튼으로 바꿀 수 있어!',
           '고양이는 절대 못잡으니까 포기해.',
           '하루때문에 나무에 새들 다 날아간다🐦',
-          '좌측 상단에 보이는 날씨 정보는 실시간 정보야!',
+          '하단에 얀버트 링크드인과 블로그 링크 남겨놨는데 확인해봐.',
+          '우편함에 편지가 도착해있을거야.',
         ]
       },
       robert: {
@@ -67,14 +68,16 @@ const I18n = {
       yan: {
         name: 'Yan',
         lines: [
-          "Oh, Haru! You're here~ Out for a walk today?",
-          'The roses I planted in the garden are growing well. Take a look!',
-          'Robert made some tasty treats today. Go ask her!',
-          "Haru, you're truly our family's treasure. You know that, right?",
-          'I was debugging code all day... Seeing you makes it all better.',
-          "Look at that tail wagging~ You're happy, right? Me too!",
+          "Oh, Haru! You're here~",
+          'I wanted the background music to be Frieren OST "Time Flows Ever Onward", but I created it with AI due to copyright.',
+          'The weather info comes from the Open-Meteo API for Seoul in real-time. Particle effects like rain, snow, and fog are applied based on the current weather!',
+          'Day and night are based on actual sunrise/sunset times. They change with the seasons!',
+          'This garden is responsive design, so you can enjoy it on mobile with touch controls.',
+          'It automatically detects Korean and English. You can switch with the 🌐 button in the top right!',
           "You'll never catch that cat, so just give up.",
           "Haru keeps scaring all the birds away from the trees 🐦",
+          "I left links to YANBERT's LinkedIn and blog at the bottom. Check them out!",
+          "There should be a letter waiting in the mailbox."
         ]
       },
       robert: {
