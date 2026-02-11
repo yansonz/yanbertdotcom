@@ -6,7 +6,9 @@ const Music = {
   masterGain: null,
   tempo: 66, // 느리고 감성적인 템포
   currentStep: 0,
-  intervalId: null,
+  nextNoteTime: 0,
+  scheduleAheadTime: 0.1, // 100ms 미리 스케줄
+  lookAhead: 25, // 25ms마다 체크
 
   // 음계 주파수 (C장조/A단조 - 서정적이고 쓸쓸한 느낌)
   notes: {
@@ -109,22 +111,57 @@ const Music = {
   play() {
     if (this.playing) return;
     this.playing = true;
+    this.nextNoteTime = this.ctx.currentTime;
+    this.scheduler();
+  },
+
+  scheduler() {
+    // AudioContext 시간 기반 스케줄링 (탭 전환 시에도 정확함)
+    while (this.nextNoteTime < this.ctx.currentTime + this.scheduleAheadTime) {
+      this.scheduleNote(this.currentStep, this.nextNoteTime);
+      this.advance();
+    }
+    if (this.playing) {
+      setTimeout(() => this.scheduler(), this.lookAhead);
+    }
+  },
+
+  advance() {
     const stepDuration = 60 / this.tempo / 2; // 8분음표 기준
+    this.nextNoteTime += stepDuration;
+    this.currentStep++;
+  },
 
-    this.intervalId = setInterval(() => {
-      if (this.muted) return;
-      const idx = this.currentStep % this.melody.length;
+  scheduleNote(step, time) {
+    if (this.muted) return;
+    const idx = step % this.melody.length;
+    const stepDuration = 60 / this.tempo / 2;
 
-      // 멜로디 (삼각파 - 부드럽고 맑은 소리)
-      const melNote = this.notes[this.melody[idx]];
-      if (melNote) this.playNote(melNote, stepDuration * 3, 'triangle', 0.2);
+    // 멜로디 (삼각파 - 부드럽고 맑은 소리)
+    const melNote = this.notes[this.melody[idx]];
+    if (melNote) this.playNoteAt(melNote, stepDuration * 3, 'triangle', 0.2, time);
 
-      // 베이스 아르페지오 (사인파 - 따뜻한 피아노 느낌)
-      const bassNote = this.notes[this.bass[idx]];
-      if (bassNote) this.playNote(bassNote, stepDuration * 1.5, 'sine', 0.15);
+    // 베이스 아르페지오 (사인파 - 따뜻한 피아노 느낌)
+    const bassNote = this.notes[this.bass[idx]];
+    if (bassNote) this.playNoteAt(bassNote, stepDuration * 1.5, 'sine', 0.15, time);
+  },
 
-      this.currentStep++;
-    }, stepDuration * 1000);
+  // 지정된 시간에 음 재생
+  playNoteAt(freq, duration, type, gainVal, time) {
+    if (!this.ctx || freq === 0) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    // 피아노처럼 부드러운 어택, 긴 릴리즈
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(gainVal, time + 0.02);
+    gain.gain.setValueAtTime(gainVal * 0.7, time + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    osc.start(time);
+    osc.stop(time + duration);
   },
 
   toggle() {
