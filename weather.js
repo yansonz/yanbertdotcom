@@ -8,6 +8,8 @@ const Weather = {
   overlay: { r: 0, g: 0, b: 0, a: 0 },
   windSpeed: 0,
   windAngle: 0,
+  sunrise: null, // HH:MM 형식
+  sunset: null,  // HH:MM 형식
 
   // WMO 날씨 코드 → 상태 매핑
   codeToCondition(code) {
@@ -26,15 +28,29 @@ const Weather = {
   // API에서 날씨 가져오기
   async fetch() {
     try {
-      const url = 'https://api.open-meteo.com/v1/forecast?latitude=37.5145&longitude=127.1059&current=temperature_2m,weathercode';
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=37.5145&longitude=127.1059&current=temperature_2m,weathercode&daily=sunrise,sunset&timezone=Asia/Seoul';
       const res = await fetch(url);
       const data = await res.json();
       this.temperature = data.current.temperature_2m;
       this.weatherCode = data.current.weathercode;
       this.condition = this.codeToCondition(this.weatherCode);
+      
+      // sunrise/sunset 파싱 (ISO 형식 → HH:MM)
+      if (data.daily && data.daily.sunrise && data.daily.sunset) {
+        const sunriseDate = new Date(data.daily.sunrise[0]);
+        const sunsetDate = new Date(data.daily.sunset[0]);
+        this.sunrise = `${String(sunriseDate.getHours()).padStart(2, '0')}:${String(sunriseDate.getMinutes()).padStart(2, '0')}`;
+        this.sunset = `${String(sunsetDate.getHours()).padStart(2, '0')}:${String(sunsetDate.getMinutes()).padStart(2, '0')}`;
+      }
+      
       this.loaded = true;
       this.setupEffects();
       this.updateInfoElement();
+      
+      // DayNight에 sunrise/sunset 전달
+      if (typeof DayNight !== 'undefined' && this.sunrise && this.sunset) {
+        DayNight.setSunTimes(this.sunrise, this.sunset);
+      }
     } catch (e) {
       // 실패 시 기본값
       this.temperature = 15;

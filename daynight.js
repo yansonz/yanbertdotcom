@@ -1,9 +1,12 @@
-// 낮/밤 시스템 - 서울 시간 기준
+// 낮/밤 시스템 - 서울 시간 기준 + 실제 일출/일몰 연동
 const DayNight = {
   phase: 'day',    // dawn, day, dusk, night
   hour: 12,
   overlay: { r: 0, g: 0, b: 0, a: 0 },
   stars: [],
+  // 기본값 (API 실패 시 사용)
+  sunriseHour: 6,
+  sunsetHour: 18,
 
   init() {
     this.updateTime();
@@ -21,6 +24,16 @@ const DayNight = {
     }
   },
 
+  // Weather에서 호출 - 실제 일출/일몰 시간 설정
+  setSunTimes(sunrise, sunset) {
+    // "HH:MM" → 소수점 시간으로 변환
+    const [sh, sm] = sunrise.split(':').map(Number);
+    const [eh, em] = sunset.split(':').map(Number);
+    this.sunriseHour = sh + sm / 60;
+    this.sunsetHour = eh + em / 60;
+    this.updateTime(); // 새 시간으로 재계산
+  },
+
   updateTime() {
     // KST (UTC+9)
     const now = new Date();
@@ -28,11 +41,17 @@ const DayNight = {
     const kst = new Date(utc + 9 * 3600000);
     this.hour = kst.getHours() + kst.getMinutes() / 60;
 
-    if (this.hour >= 5 && this.hour < 7) {
+    // 일출/일몰 기준으로 phase 결정
+    const dawnStart = this.sunriseHour - 1;      // 일출 1시간 전
+    const dawnEnd = this.sunriseHour + 0.5;      // 일출 30분 후
+    const duskStart = this.sunsetHour - 0.5;     // 일몰 30분 전
+    const duskEnd = this.sunsetHour + 1;         // 일몰 1시간 후
+
+    if (this.hour >= dawnStart && this.hour < dawnEnd) {
       this.phase = 'dawn';
-    } else if (this.hour >= 7 && this.hour < 17) {
+    } else if (this.hour >= dawnEnd && this.hour < duskStart) {
       this.phase = 'day';
-    } else if (this.hour >= 17 && this.hour < 19.5) {
+    } else if (this.hour >= duskStart && this.hour < duskEnd) {
       this.phase = 'dusk';
     } else {
       this.phase = 'night';
@@ -55,10 +74,17 @@ const DayNight = {
   },
 
   setupOverlay() {
+    // 일출/일몰 기준 시간 계산
+    const dawnStart = this.sunriseHour - 1;
+    const dawnEnd = this.sunriseHour + 0.5;
+    const duskStart = this.sunsetHour - 0.5;
+    const duskEnd = this.sunsetHour + 1;
+
     switch (this.phase) {
       case 'dawn':
         // 새벽 - 보라+주황 톤, 점점 밝아짐
-        const dawnProgress = (this.hour - 5) / 2; // 0~1
+        const dawnDuration = dawnEnd - dawnStart;
+        const dawnProgress = (this.hour - dawnStart) / dawnDuration; // 0~1
         this.overlay = {
           r: 80 - dawnProgress * 60,
           g: 40 - dawnProgress * 30,
@@ -71,7 +97,8 @@ const DayNight = {
         break;
       case 'dusk':
         // 석양 - 주황+붉은 톤, 점점 어두워짐
-        const duskProgress = (this.hour - 17) / 2.5; // 0~1
+        const duskDuration = duskEnd - duskStart;
+        const duskProgress = (this.hour - duskStart) / duskDuration; // 0~1
         this.overlay = {
           r: 60 + duskProgress * 40,
           g: 20 + duskProgress * 10,
