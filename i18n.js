@@ -121,12 +121,19 @@ const I18n = {
         // HTML 태그 제거 및 길이 제한
         const cleanDesc = description.replace(/<[^>]*>/g, '').substring(0, 150);
         
-        // 발행일로부터 경과 일수 계산
+        // 발행일로부터 경과 일수 계산 (KST 기준)
         let daysAgo = '';
         if (pubDate) {
-          const publishDate = new Date(pubDate);
+          const publishDate = new Date(pubDate); // 이미 KST 기준
+          // KST 기준 현재 시간 (UTC+9)
           const now = new Date();
-          const diffTime = Math.abs(now - publishDate);
+          const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+          
+          // 날짜만 비교 (시간 제거)
+          const nowDate = new Date(kstNow.getFullYear(), kstNow.getMonth(), kstNow.getDate());
+          const publishDateOnly = new Date(publishDate.getFullYear(), publishDate.getMonth(), publishDate.getDate());
+          
+          const diffTime = Math.abs(nowDate - publishDateOnly);
           const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
           
           if (this.lang === 'ko') {
