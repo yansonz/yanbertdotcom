@@ -11,13 +11,9 @@ const I18n = {
       catMeow: '야옹~',
       mailbox: {
         name: '📮 우편함',
-        lines: [
-          '이 편지는 영국에서 최초로 시작되어 일년에 한바퀴를 돌면서 받는 사람에게 행운을 주었습니다.',
-          '지금은 당신에게로 옮겨진 이 편지는 4일 안에 당신 곁을 떠나야 합니다.',
-          '이 편지를 보낸 사람은...',
-          '👨 얀: <a href="https://www.linkedin.com/in/yanso?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">LinkedIn</a> | <a href="http://yanlog.yanbert.com?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">Blog</a><br>👩 로버트: <a href="https://www.linkedin.com/in/yoojin-lee-b7160511a?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">LinkedIn</a> | <a href="http://robert.yanbert.com?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">Blog</a>',
-          '이 편지를 무시하면 하루에게 간식을 빼앗깁니다. 믿거나 말거나... 🐕'
-        ]
+        lines: [], // RSS 피드로 동적 생성
+        loading: '블로그 최신글을 불러오는 중...',
+        error: '블로그 글을 불러올 수 없습니다.'
       },
       yan: {
         name: '얀',
@@ -57,13 +53,9 @@ const I18n = {
       catMeow: 'Meow~',
       mailbox: {
         name: '📮 Mail Box',
-        lines: [
-          'DO NOT DELETE THIS MESSAGE!! Forward this to 10 friends or face 7 years of bad luck!!!',
-          'A guy in Ohio ignored this in 2003 and his WiFi has been slow ever since...',
-          'This message was sent by...',
-          '👨 Yan: <a href="https://www.linkedin.com/in/yanso?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">LinkedIn</a> | <a href="http://yanlog.yanbert.com?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">Blog</a><br>👩 Robert: <a href="https://www.linkedin.com/in/yoojin-lee-b7160511a?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">LinkedIn</a> | <a href="http://robert.yanbert.com?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">Blog</a>',
-          'If you ignore this, Haru WILL find your snacks. You have been warned... 🐕'
-        ]
+        lines: [], // RSS 피드로 동적 생성
+        loading: 'Loading latest blog posts...',
+        error: 'Unable to load blog posts.'
       },
       yan: {
         name: 'Yan',
@@ -97,10 +89,87 @@ const I18n = {
     }
   },
 
-  init() {
+  async init() {
     const browserLang = navigator.language || navigator.userLanguage || 'en';
     this.lang = browserLang.startsWith('ko') ? 'ko' : 'en';
     this.applyToDOM();
+    await this.loadRssFeed();
+  },
+
+  async loadRssFeed() {
+    const rssUrl = this.lang === 'ko' 
+      ? 'https://yanlog.yanbert.com/ko/rss.xml'
+      : 'https://yanlog.yanbert.com/en/rss.xml';
+    
+    try {
+      const response = await fetch(rssUrl);
+      const text = await response.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, 'text/xml');
+      
+      const items = xml.querySelectorAll('item');
+      const posts = [];
+      
+      // 최신글 1개만 가져오기
+      if (items.length > 0) {
+        const item = items[0];
+        const title = item.querySelector('title')?.textContent || '';
+        const link = item.querySelector('link')?.textContent || '';
+        const description = item.querySelector('description')?.textContent || '';
+        const pubDate = item.querySelector('pubDate')?.textContent || '';
+        
+        // HTML 태그 제거 및 길이 제한
+        const cleanDesc = description.replace(/<[^>]*>/g, '').substring(0, 150);
+        
+        // 발행일로부터 경과 일수 계산
+        let daysAgo = '';
+        if (pubDate) {
+          const publishDate = new Date(pubDate);
+          const now = new Date();
+          const diffTime = Math.abs(now - publishDate);
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (this.lang === 'ko') {
+            if (diffDays === 0) {
+              daysAgo = '오늘 작성';
+            } else if (diffDays === 1) {
+              daysAgo = '어제 작성';
+            } else {
+              daysAgo = `${diffDays}일 전 작성`;
+            }
+          } else {
+            if (diffDays === 0) {
+              daysAgo = 'Posted today';
+            } else if (diffDays === 1) {
+              daysAgo = 'Posted yesterday';
+            } else {
+              daysAgo = `Posted ${diffDays} days ago`;
+            }
+          }
+        }
+        
+        posts.push({ title, link, description: cleanDesc, daysAgo });
+      }
+      
+      // 메일함 대화 내용 생성
+      const mailboxData = this.texts[this.lang].mailbox;
+      mailboxData.lines = [];
+      
+      if (posts.length > 0) {
+        const post = posts[0];
+        if (this.lang === 'ko') {
+          mailboxData.lines.push(`📬 얀의 블로그 최신글<br><br><strong>${post.title}</strong><br><em>${post.daysAgo}</em><br><br>${post.description}...<br><br><a href="${post.link}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">📖 글 읽으러 가기</a> | <a href="https://yanlog.yanbert.com/ko/blog?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">더 많은 글 보기</a>`);
+        } else {
+          mailboxData.lines.push(`📬 Yan's Latest Blog Post<br><br><strong>${post.title}</strong><br><em>${post.daysAgo}</em><br><br>${post.description}...<br><br><a href="${post.link}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">📖 Read more</a> | <a href="https://yanlog.yanbert.com/en/blog?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">More posts</a>`);
+        }
+      } else {
+        mailboxData.lines = [mailboxData.error];
+      }
+    } catch (error) {
+      console.error('RSS 피드 로드 실패:', error);
+      const mailboxData = this.texts[this.lang].mailbox;
+      mailboxData.lines = [mailboxData.error];
+    }
   },
 
   get(key) {
@@ -132,8 +201,9 @@ const I18n = {
     }
   },
 
-  toggle() {
+  async toggle() {
     this.lang = this.lang === 'ko' ? 'en' : 'ko';
     this.applyToDOM();
+    await this.loadRssFeed();
   }
 };

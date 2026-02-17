@@ -820,9 +820,13 @@ function gameLoop(timestamp) {
 }
 
 // 초기화 및 시작
-I18n.init();
-Music.init();
-DayNight.init();
-Weather.fetch();
-initMap();
-requestAnimationFrame(gameLoop);
+async function initGame() {
+  await I18n.init();
+  Music.init();
+  DayNight.init();
+  Weather.fetch();
+  initMap();
+  requestAnimationFrame(gameLoop);
+}
+
+initGame();

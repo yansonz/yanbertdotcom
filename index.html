@@ -20,7 +20,7 @@
     <div id="time-info"></div>
     <div id="weather-info"></div>
     <button id="music-toggle" onclick="Music.toggle()">🎵</button>
-    <button id="lang-toggle" onclick="I18n.toggle()">🌐 EN</button>
+    <button id="lang-toggle" onclick="I18n.toggle().catch(console.error)">🌐 EN</button>
   </div>
   <div id="dialog" class="dialog hidden" ontouchstart="if(event.target.tagName!=='A'){event.preventDefault();DialogSystem.advance();}">
     <div class="dialog-name" id="dialog-name"></div>

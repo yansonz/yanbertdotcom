@@ -38,6 +38,15 @@ const DialogSystem = {
     this.currentText = '';
     this.frameCount = 0;
     this.show();
+    
+    // 우편함은 타이핑 효과 없이 바로 표시
+    if (this.isHtml) {
+      const fullText = dialog.lines[this.dialogIndex];
+      const textEl = document.getElementById('dialog-text');
+      textEl.innerHTML = fullText;
+      this.currentText = fullText.replace(/<[^>]*>/g, '');
+      this.textIndex = this.currentText.length;
+    }
   },
 
   // 대화 진행 (Space 키)
