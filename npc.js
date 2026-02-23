@@ -75,6 +75,13 @@ const DialogSystem = {
       this.textIndex = 0;
       this.currentText = '';
       this.frameCount = 0;
+      
+      // 다음 다이얼로그도 타이핑 효과 없이 바로 표시
+      const nextFullText = dialog.lines[this.dialogIndex];
+      const textEl = document.getElementById('dialog-text');
+      textEl.innerHTML = nextFullText;
+      this.currentText = nextFullText.replace(/<[^>]*>/g, '');
+      this.textIndex = this.currentText.length;
       return;
     }
 
