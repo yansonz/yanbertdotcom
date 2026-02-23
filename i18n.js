@@ -97,78 +97,121 @@ const I18n = {
   },
 
   async loadRssFeed() {
-    const rssUrl = this.lang === 'ko' 
-      ? 'https://yanlog.yanbert.com/ko/rss.xml'
-      : 'https://yanlog.yanbert.com/en/rss.xml';
+    const rssFeeds = [
+      {
+        name: 'Yan',
+        nameKo: '얀',
+        url: this.lang === 'ko' 
+          ? 'https://yanlog.yanbert.com/ko/rss.xml'
+          : 'https://yanlog.yanbert.com/en/rss.xml',
+        blogUrl: this.lang === 'ko'
+          ? 'https://yanlog.yanbert.com/ko/blog'
+          : 'https://yanlog.yanbert.com/en/blog'
+      },
+      {
+        name: 'Robert',
+        nameKo: '로버트',
+        url: this.lang === 'ko'
+          ? 'https://robert.yanbert.com/ko/rss.xml'
+          : 'https://robert.yanbert.com/en/rss.xml',
+        blogUrl: this.lang === 'ko'
+          ? 'https://robert.yanbert.com/ko/blog'
+          : 'https://robert.yanbert.com/en/blog'
+      }
+    ];
     
     try {
-      const response = await fetch(rssUrl);
-      const text = await response.text();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, 'text/xml');
+      const allPosts = [];
       
-      const items = xml.querySelectorAll('item');
-      const posts = [];
-      
-      // 최신글 1개만 가져오기
-      if (items.length > 0) {
-        const item = items[0];
-        const title = item.querySelector('title')?.textContent || '';
-        const link = item.querySelector('link')?.textContent || '';
-        const description = item.querySelector('description')?.textContent || '';
-        const pubDate = item.querySelector('pubDate')?.textContent || '';
-        
-        // HTML 태그 제거 및 길이 제한
-        const cleanDesc = description.replace(/<[^>]*>/g, '').substring(0, 150);
-        
-        // 발행일로부터 경과 일수 계산 (KST 기준)
-        let daysAgo = '';
-        if (pubDate) {
-          const publishDate = new Date(pubDate); // 이미 KST 기준
-          // KST 기준 현재 시간 (UTC+9)
-          const now = new Date();
-          const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+      // 모든 RSS 피드에서 최신글 가져오기
+      for (const feed of rssFeeds) {
+        try {
+          const response = await fetch(feed.url);
+          const text = await response.text();
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(text, 'text/xml');
           
-          // 날짜만 비교 (시간 제거)
-          const nowDate = new Date(kstNow.getFullYear(), kstNow.getMonth(), kstNow.getDate());
-          const publishDateOnly = new Date(publishDate.getFullYear(), publishDate.getMonth(), publishDate.getDate());
+          const items = xml.querySelectorAll('item');
           
-          const diffTime = Math.abs(nowDate - publishDateOnly);
-          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          
-          if (this.lang === 'ko') {
-            if (diffDays === 0) {
-              daysAgo = '오늘 작성';
-            } else if (diffDays === 1) {
-              daysAgo = '어제 작성';
-            } else {
-              daysAgo = `${diffDays}일 전 작성`;
+          if (items.length > 0) {
+            const item = items[0];
+            const title = item.querySelector('title')?.textContent || '';
+            const link = item.querySelector('link')?.textContent || '';
+            const description = item.querySelector('description')?.textContent || '';
+            const pubDate = item.querySelector('pubDate')?.textContent || '';
+            
+            // HTML 태그 제거 및 길이 제한
+            const cleanDesc = description.replace(/<[^>]*>/g, '').substring(0, 150);
+            
+            // 발행일로부터 경과 일수 계산 (KST 기준)
+            let daysAgo = '';
+            let publishDate = null;
+            if (pubDate) {
+              publishDate = new Date(pubDate); // 이미 KST 기준
+              // KST 기준 현재 시간 (UTC+9)
+              const now = new Date();
+              const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+              
+              // 날짜만 비교 (시간 제거)
+              const nowDate = new Date(kstNow.getFullYear(), kstNow.getMonth(), kstNow.getDate());
+              const publishDateOnly = new Date(publishDate.getFullYear(), publishDate.getMonth(), publishDate.getDate());
+              
+              const diffTime = Math.abs(nowDate - publishDateOnly);
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              
+              if (this.lang === 'ko') {
+                if (diffDays === 0) {
+                  daysAgo = '오늘 작성';
+                } else if (diffDays === 1) {
+                  daysAgo = '어제 작성';
+                } else {
+                  daysAgo = `${diffDays}일 전 작성`;
+                }
+              } else {
+                if (diffDays === 0) {
+                  daysAgo = 'Posted today';
+                } else if (diffDays === 1) {
+                  daysAgo = 'Posted yesterday';
+                } else {
+                  daysAgo = `Posted ${diffDays} days ago`;
+                }
+              }
             }
-          } else {
-            if (diffDays === 0) {
-              daysAgo = 'Posted today';
-            } else if (diffDays === 1) {
-              daysAgo = 'Posted yesterday';
-            } else {
-              daysAgo = `Posted ${diffDays} days ago`;
-            }
+            
+            allPosts.push({
+              author: this.lang === 'ko' ? feed.nameKo : feed.name,
+              title,
+              link,
+              description: cleanDesc,
+              daysAgo,
+              publishDate,
+              blogUrl: feed.blogUrl
+            });
           }
+        } catch (feedError) {
+          console.error(`RSS 피드 로드 실패 (${feed.name}):`, feedError);
         }
-        
-        posts.push({ title, link, description: cleanDesc, daysAgo });
       }
       
-      // 메일함 대화 내용 생성
+      // 발행일 기준 최신순 정렬
+      allPosts.sort((a, b) => {
+        if (!a.publishDate) return 1;
+        if (!b.publishDate) return -1;
+        return b.publishDate - a.publishDate;
+      });
+      
+      // 메일함 대화 내용 생성 (각 블로그별 별도 다이얼로그)
       const mailboxData = this.texts[this.lang].mailbox;
       mailboxData.lines = [];
       
-      if (posts.length > 0) {
-        const post = posts[0];
-        if (this.lang === 'ko') {
-          mailboxData.lines.push(`📬 얀의 블로그 최신글<br><br><strong>${post.title}</strong><br><em>${post.daysAgo}</em><br><br>${post.description}...<br><br><a href="${post.link}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">📖 글 읽으러 가기</a> | <a href="https://yanlog.yanbert.com/ko/blog?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">더 많은 글 보기</a>`);
-        } else {
-          mailboxData.lines.push(`📬 Yan's Latest Blog Post<br><br><strong>${post.title}</strong><br><em>${post.daysAgo}</em><br><br>${post.description}...<br><br><a href="${post.link}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">📖 Read more</a> | <a href="https://yanlog.yanbert.com/en/blog?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">More posts</a>`);
-        }
+      if (allPosts.length > 0) {
+        allPosts.forEach(post => {
+          if (this.lang === 'ko') {
+            mailboxData.lines.push(`📬 ${post.author}의 블로그 최신글<br><br><strong>${post.title}</strong><br><em>${post.daysAgo}</em><br><br>${post.description}...<br><br><a href="${post.link}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">📖 글 읽으러 가기</a> | <a href="${post.blogUrl}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">더 많은 글 보기</a>`);
+          } else {
+            mailboxData.lines.push(`📬 ${post.author}'s Latest Blog Post<br><br><strong>${post.title}</strong><br><em>${post.daysAgo}</em><br><br>${post.description}...<br><br><a href="${post.link}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">📖 Read more</a> | <a href="${post.blogUrl}?utm_source=yanbertdotcom&utm_medium=web&utm_campaign=mailbox" target="_blank">More posts</a>`);
+          }
+        });
       } else {
         mailboxData.lines = [mailboxData.error];
       }
