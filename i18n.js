@@ -111,7 +111,9 @@ const I18n = {
       {
         name: 'Robert',
         nameKo: '로버트',
-        url: 'https://rss.blog.naver.com/jonasmemo.xml',
+        url: this.lang === 'ko'
+          ? 'https://robert.yanbert.com/ko/rss.xml'
+          : 'https://robert.yanbert.com/en/rss.xml',
         blogUrl: this.lang === 'ko'
           ? 'https://robert.yanbert.com/ko/blog'
           : 'https://robert.yanbert.com/en/blog'
